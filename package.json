@@ -18,10 +18,10 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "build": "node app.js",
-    "test": "node app.js",
-    "eject": "node app.js"
+    "start": "node src/app.js",
+    "build": "node src/app.js",
+    "test": "node src/app.js",
+    "eject": "node src/app.js"
   },
   "repository": {
     "type": "git",
