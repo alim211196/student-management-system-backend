@@ -200,7 +200,6 @@ router.post("/students/comment/reply", async (req, res) => {
         from: "Alim.Mohammad619@outlook.com",
         to: email,
         subject: subject,
-        text: User_reply,
         html: generateEmailTemplate(
           ` Dear ${fullName}! Thank you for reaching out to us. We have sent you our response.
             If you have any further questions or need additional assistance, 

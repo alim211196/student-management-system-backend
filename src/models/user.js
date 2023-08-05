@@ -4,6 +4,11 @@ const validator = require("validator");
 const onlyForTeacher = (role) => {
   return role !== "admin";
 };
+
+const adminValidator = function (value) {
+  return onlyForTeacher(this.role) || value;
+};
+
 const UserSchema = mongoose.Schema({
   fullName: {
     type: String,
@@ -28,32 +33,32 @@ const UserSchema = mongoose.Schema({
   },
   course: {
     type: String,
-    required: onlyForTeacher(this.role),
+    validate: adminValidator,
   },
   courseYear: {
     type: String,
-    required: onlyForTeacher(this.role),
+    validate: adminValidator,
   },
   address: {
     type: String,
-    required: onlyForTeacher(this.role),
+    validate: adminValidator,
   },
   city: {
     type: String,
-    required: onlyForTeacher(this.role),
+    validate: adminValidator,
   },
   pinCode: {
     type: Number,
-    required: onlyForTeacher(this.role),
+    validate: adminValidator,
     min: 6,
   },
   state: {
     type: String,
-    required: onlyForTeacher(this.role),
+    validate: adminValidator,
   },
   country: {
     type: String,
-    required: onlyForTeacher(this.role),
+    validate: adminValidator,
   },
   date: {
     type: Date,
@@ -61,20 +66,20 @@ const UserSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: onlyForTeacher(this.role),
+    required: adminValidator,
     minlength: [8, "minimum 8 letters"],
   },
   role: {
     type: String,
     required: true,
   },
-  active:{
+  active: {
     type: Boolean,
-    required:true
+    required: true,
   },
   profileImage: { type: String, default: null },
 });
 
-const User = new mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
 
 module.exports = User;
