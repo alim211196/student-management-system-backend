@@ -275,9 +275,9 @@ router.post("/user/register", async (req, res) => {
       const mailOptions = {
         from: "Alim.Mohammad619@outlook.com",
         to: email,
-        subject: `Hi ${fullName} your account has been registered for StudentTracker.`,
+        subject: `Hi ${fullName} your account has been registered for StudentsTracker.`,
         html: generateEmailTemplate(
-          `Hello ${fullName}! Thanks for joining StudentTracker, We have sent your credential below:`,
+          `Hello ${fullName}! Thanks for joining StudentsTracker, We have sent your credential below:`,
           `Email: ${email}`,
           `Password: ${password}.`
         ),
@@ -369,9 +369,9 @@ router.patch("/user/update-user/:id", async (req, res) => {
       const mailOptions = {
         from: "Alim.Mohammad619@outlook.com",
         to: existingUser.email,
-        subject: `Password has been updated for StudentTracker by administrator.`,
+        subject: `Password has been updated for StudentsTracker by administrator.`,
         html: generateEmailTemplate(
-          `Hello ${existingUser.fullName}! Your StudentTracker account's password has been updated:`,
+          `Hello ${existingUser.fullName}! Your StudentsTracker account's password has been updated:`,
           `Your updated password: ${req.body.password}`
         ),
       };
@@ -486,7 +486,7 @@ router.post("/user/forgot-password", async (req, res) => {
         to: email,
         subject: "Password Reset OTP",
         html: generateEmailTemplate(
-          `Hello ${email}! Your StudentTracker account's One-Time Password (OTP) for password reset is provided below:`,
+          `Hello ${email}! Your StudentsTracker account's One-Time Password (OTP) for password reset is provided below:`,
           `OTP: ${otp} Please use this OTP to complete your password reset process.
            If you did not request this reset or have any concerns,
             please contact our support team immediately.`

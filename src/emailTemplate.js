@@ -26,7 +26,7 @@ const generateEmailTemplate = (title, value1, value2) => {
     </head>
     <body>
       <div class="email-container">
-        <h1 class="header">StudentTracker</h1>
+        <h1 class="header">StudentsTracker</h1>
         <p class="title">${title}</p>
         <ul class="description">
           <li>${value1}</li>
@@ -35,7 +35,7 @@ const generateEmailTemplate = (title, value1, value2) => {
         <br/>
         <br/>
          <p class="title">Best regards,</p>
-           <p class="title">The StudentTracker Team,</p>
+           <p class="title">The StudentsTracker Team,</p>
       </div>
     </body>
     </html>
