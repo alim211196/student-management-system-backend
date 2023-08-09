@@ -4,7 +4,6 @@ const OTPSchema = mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: [true, "Email address already present"],
     validate(v) {
       if (!validator.isEmail(v)) {
         throw new Error("invalid Email");

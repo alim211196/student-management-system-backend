@@ -9,7 +9,6 @@ const contactSchema = mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: [true, "Email address already present"],
     validate(v) {
       if (!validator.isEmail(v)) {
         throw new Error("invalid Email");
@@ -20,7 +19,6 @@ const contactSchema = mongoose.Schema({
     type: Number,
     min: 10,
     required: true,
-    unique: true,
   },
   gender: {
     type: String,
