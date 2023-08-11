@@ -31,12 +31,13 @@ const insertOTP = async (email, otp) => {
   try {
     const otpData = {
       email,
-      otp: otp.toString(), // Convert the OTP to a string before saving
+      otp: otp.toString(),
     };
-    const savedOTP = await OTPModel.create(otpData);
-    return savedOTP;
+    await OTPModel.create(otpData);
+    return true; // Indicate successful insertion
   } catch (error) {
-    throw new Error("Failed to save OTP");
+    console.error("Error saving OTP:", error);
+    return false; // Indicate failure
   }
 };
 
@@ -472,41 +473,82 @@ router.post("/user/login", async (req, res) => {
 });
 
 //create forgot password api
+// router.post("/user/forgot-password", async (req, res) => {
+//   try {
+//     const email = req.body.email;
+//     const user = await User.findOne({ email });
+//     const userId = user._id;
+//     const Id = userId.toString();
+//     if (user) {
+//       // Generate and send OTP to user's email
+//       const otp = generateOTP();
+//       const mailOptions = {
+//         from: "Alim.Mohammad619@outlook.com",
+//         to: email,
+//         subject: "Password Reset OTP",
+//         html: generateEmailTemplate(
+//           `Hello ${email}! Your StudentsTracker account's One-Time Password (OTP) for password reset is provided below:`,
+//           `OTP: ${otp} Please use this OTP to complete your password reset process.
+//            If you did not request this reset or have any concerns,
+//             please contact our support team immediately.`
+//         ),
+//       };
+
+//       // Send the email
+//       transporter.sendMail(mailOptions, (error, info) => {
+//         if (error) {
+//           res.status(500).send("Failed to send OTP");
+//         } else {
+//           // Insert OTP into the database
+//           insertOTP(email, otp);
+//           res.status(201).send(Id);
+//         }
+//       });
+//     } else {
+//       res.status(404).send("User not found");
+//     }
+//   } catch (err) {
+//     res.status(500).send("Internal server error");
+//   }
+// });
+
 router.post("/user/forgot-password", async (req, res) => {
   try {
     const email = req.body.email;
     const user = await User.findOne({ email });
-    const userId = user._id;
-    const Id = userId.toString();
+
     if (user) {
-      // Generate and send OTP to user's email
       const otp = generateOTP();
-      const mailOptions = {
-        from: "Alim.Mohammad619@outlook.com",
-        to: email,
-        subject: "Password Reset OTP",
-        html: generateEmailTemplate(
-          `Hello ${email}! Your StudentsTracker account's One-Time Password (OTP) for password reset is provided below:`,
-          `OTP: ${otp} Please use this OTP to complete your password reset process.
+       const mailOptions = {
+         from: "Alim.Mohammad619@outlook.com",
+         to: email,
+         subject: "Password Reset OTP",
+         html: generateEmailTemplate(
+           `Hello ${email}! Your StudentsTracker account's One-Time Password (OTP) for password reset is provided below:`,
+           `OTP: ${otp} Please use this OTP to complete your password reset process.
            If you did not request this reset or have any concerns,
             please contact our support team immediately.`
-        ),
-      };
+         ),
+       };
 
-      // Send the email
-      transporter.sendMail(mailOptions, (error, info) => {
+      transporter.sendMail(mailOptions, async (error, info) => {
         if (error) {
+          console.error("Failed to send OTP:", error);
           res.status(500).send("Failed to send OTP");
         } else {
-          // Insert OTP into the database
-          insertOTP(email, otp);
-          res.status(201).send(Id);
+          const otpInserted = await insertOTP(email, otp);
+          if (otpInserted) {
+            res.status(201).send("OTP sent and saved successfully");
+          } else {
+            res.status(500).send("Failed to save OTP");
+          }
         }
       });
     } else {
       res.status(404).send("User not found");
     }
   } catch (err) {
+    console.error("Internal server error:", err);
     res.status(500).send("Internal server error");
   }
 });
