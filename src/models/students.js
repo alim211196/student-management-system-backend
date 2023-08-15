@@ -74,6 +74,10 @@ const studentSchema = mongoose.Schema({
     type: Boolean,
     required: true,
   },
+  isWished:{
+     type: Boolean,
+    required: true,
+  },
   profileImage: { type: String, default: null },
 });
 

@@ -9,6 +9,7 @@ const Attendance = require("../models/attendance");
 const OTPModel = require("../models/otp_model");
 const Course = require("../models/courses");
 const generateEmailTemplate = require("../emailTemplate");
+const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
   service: "outlook",
@@ -472,46 +473,6 @@ router.post("/user/login", async (req, res) => {
   }
 });
 
-//create forgot password api
-// router.post("/user/forgot-password", async (req, res) => {
-//   try {
-//     const email = req.body.email;
-//     const user = await User.findOne({ email });
-//     const userId = user._id;
-//     const Id = userId.toString();
-//     if (user) {
-//       // Generate and send OTP to user's email
-//       const otp = generateOTP();
-//       const mailOptions = {
-//         from: "Alim.Mohammad619@outlook.com",
-//         to: email,
-//         subject: "Password Reset OTP",
-//         html: generateEmailTemplate(
-//           `Hello ${email}! Your StudentsTracker account's One-Time Password (OTP) for password reset is provided below:`,
-//           `OTP: ${otp} Please use this OTP to complete your password reset process.
-//            If you did not request this reset or have any concerns,
-//             please contact our support team immediately.`
-//         ),
-//       };
-
-//       // Send the email
-//       transporter.sendMail(mailOptions, (error, info) => {
-//         if (error) {
-//           res.status(500).send("Failed to send OTP");
-//         } else {
-//           // Insert OTP into the database
-//           insertOTP(email, otp);
-//           res.status(201).send(Id);
-//         }
-//       });
-//     } else {
-//       res.status(404).send("User not found");
-//     }
-//   } catch (err) {
-//     res.status(500).send("Internal server error");
-//   }
-// });
-
 router.post("/user/forgot-password", async (req, res) => {
   try {
     const email = req.body.email;
@@ -519,17 +480,17 @@ router.post("/user/forgot-password", async (req, res) => {
 
     if (user) {
       const otp = generateOTP();
-       const mailOptions = {
-         from: "Alim.Mohammad619@outlook.com",
-         to: email,
-         subject: "Password Reset OTP",
-         html: generateEmailTemplate(
-           `Hello ${email}! Your StudentsTracker account's One-Time Password (OTP) for password reset is provided below:`,
-           `OTP: ${otp} Please use this OTP to complete your password reset process.
+      const mailOptions = {
+        from: "Alim.Mohammad619@outlook.com",
+        to: email,
+        subject: "Password Reset OTP",
+        html: generateEmailTemplate(
+          `Hello ${email}! Your StudentsTracker account's One-Time Password (OTP) for password reset is provided below:`,
+          `OTP: ${otp} Please use this OTP to complete your password reset process.
            If you did not request this reset or have any concerns,
             please contact our support team immediately.`
-         ),
-       };
+        ),
+      };
 
       transporter.sendMail(mailOptions, async (error, info) => {
         if (error) {
@@ -578,6 +539,54 @@ router.patch("/user/reset-password/:id", async (req, res) => {
     }
   } catch (err) {
     res.status(500).send("Internal server error.");
+  }
+});
+
+//send birthday wishes api
+router.post("/user/send-wishes/:id", async (req, res) => {
+  try {
+    const _id = req.params.id;
+      const userModel =
+        (await User.findById(_id)) || (await Students.findById(_id));
+
+      if (!userModel) {
+        return res.status(404).send("User not found");
+      }
+     const { fullName, email, dob } = req.body;
+     const dobDate = new Date(dob);
+     const today = new Date();
+     const age =
+       today.getFullYear() -
+       dobDate.getFullYear() -
+       (today.getMonth() < dobDate.getMonth() ||
+       (today.getMonth() === dobDate.getMonth() &&
+         today.getDate() < dobDate.getDate())
+         ? 1
+         : 0);
+
+      const mailOptions = {
+        from: "Alim.Mohammad619@outlook.com",
+        to: email,
+        subject: `Birthday Greetings for ${fullName}!`,
+        html: generateBirthdayEmailTemplate(fullName, age),
+      };
+
+      transporter.sendMail(mailOptions, async (error, info) => {
+        if (error) {
+          res.status(500).send("Failed to send OTP");
+        } else {
+          await User.findByIdAndUpdate(_id, { isWished: true }, { new: true });
+          await Students.findByIdAndUpdate(
+            _id,
+            { isWished: true },
+            { new: true }
+          );
+          res.status(201).send("Birthday wishes send successfully");
+        }
+      });
+  
+  } catch (err) {
+    res.status(500).send("Internal server error");
   }
 });
 

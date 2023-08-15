@@ -31,6 +31,14 @@ const UserSchema = mongoose.Schema({
     required: true,
     unique: true,
   },
+  dob: {
+    type: Date,
+    validate: adminValidator,
+  },
+  gender: {
+    type: String,
+    validate: adminValidator,
+  },
   course: {
     type: String,
     validate: adminValidator,
@@ -74,6 +82,10 @@ const UserSchema = mongoose.Schema({
     required: true,
   },
   active: {
+    type: Boolean,
+    required: true,
+  },
+  isWished: {
     type: Boolean,
     required: true,
   },
