@@ -10,12 +10,17 @@ const OTPModel = require("../models/otp_model");
 const Course = require("../models/courses");
 const generateEmailTemplate = require("../emailTemplate");
 const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
+
+const smtpUsername = process.env.SMTP_USERNAME;
+const smtpPassword = process.env.SMTP_PASSWORD;
+
+
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
   service: "outlook",
   auth: {
-    user: "Alim.Mohammad619@outlook.com",
-    pass: "Mc@2020!$",
+    user: smtpUsername,
+    pass: smtpPassword,
   },
 });
 
@@ -199,7 +204,7 @@ router.post("/students/comment/reply", async (req, res) => {
     const result = await reply.save();
     if (user_contact) {
       const mailOptions = {
-        from: "Alim.Mohammad619@outlook.com",
+        from: smtpUsername,
         to: email,
         subject: subject,
         html: generateEmailTemplate(
@@ -275,7 +280,7 @@ router.post("/user/register", async (req, res) => {
     const result = await user.save();
     if (password) {
       const mailOptions = {
-        from: "Alim.Mohammad619@outlook.com",
+        from: smtpUsername,
         to: email,
         subject: `Hi ${fullName} your account has been registered for StudentsTracker.`,
         html: generateEmailTemplate(
@@ -369,7 +374,7 @@ router.patch("/user/update-user/:id", async (req, res) => {
     // Check if the password field is being updated
     if (existingUser.password !== req.body.password) {
       const mailOptions = {
-        from: "Alim.Mohammad619@outlook.com",
+        from: smtpUsername,
         to: existingUser.email,
         subject: `Password has been updated for StudentsTracker by administrator.`,
         html: generateEmailTemplate(
@@ -481,7 +486,7 @@ router.post("/user/forgot-password", async (req, res) => {
     if (user) {
       const otp = generateOTP();
       const mailOptions = {
-        from: "Alim.Mohammad619@outlook.com",
+        from: smtpUsername,
         to: email,
         subject: "Password Reset OTP",
         html: generateEmailTemplate(
@@ -565,7 +570,7 @@ router.post("/user/send-wishes/:id", async (req, res) => {
          : 0);
 
       const mailOptions = {
-        from: "Alim.Mohammad619@outlook.com",
+        from: smtpUsername,
         to: email,
         subject: `Birthday Greetings for ${fullName}!`,
         html: generateBirthdayEmailTemplate(fullName, age),
