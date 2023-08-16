@@ -216,6 +216,7 @@ router.post("/students/comment/reply", async (req, res) => {
       };
       // Send the email
       transporter.sendMail(mailOptions, (error, info) => {
+        console.log(error,info)
         if (error) {
           res.status(500).send("Failed to send reply.");
         } else {
