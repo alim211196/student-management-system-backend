@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const nodemailer = require("nodemailer");
 const router = new express.Router();
@@ -8,12 +9,14 @@ const Reply = require("../models/reply");
 const Attendance = require("../models/attendance");
 const OTPModel = require("../models/otp_model");
 const Course = require("../models/courses");
+
 const generateEmailTemplate = require("../emailTemplate");
 const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
 
 const smtpUsername = process.env.SMTP_USERNAME;
 const smtpPassword = process.env.SMTP_PASSWORD;
 
+console.log(smtpUsername, smtpPassword);
 
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -216,7 +219,7 @@ router.post("/students/comment/reply", async (req, res) => {
       };
       // Send the email
       transporter.sendMail(mailOptions, (error, info) => {
-        console.log(error,info)
+        console.log(error, info);
         if (error) {
           res.status(500).send("Failed to send reply.");
         } else {
@@ -552,45 +555,44 @@ router.patch("/user/reset-password/:id", async (req, res) => {
 router.post("/user/send-wishes/:id", async (req, res) => {
   try {
     const _id = req.params.id;
-      const userModel =
-        (await User.findById(_id)) || (await Students.findById(_id));
+    const userModel =
+      (await User.findById(_id)) || (await Students.findById(_id));
 
-      if (!userModel) {
-        return res.status(404).send("User not found");
+    if (!userModel) {
+      return res.status(404).send("User not found");
+    }
+    const { fullName, email, dob } = req.body;
+    const dobDate = new Date(dob);
+    const today = new Date();
+    const age =
+      today.getFullYear() -
+      dobDate.getFullYear() -
+      (today.getMonth() < dobDate.getMonth() ||
+      (today.getMonth() === dobDate.getMonth() &&
+        today.getDate() < dobDate.getDate())
+        ? 1
+        : 0);
+
+    const mailOptions = {
+      from: smtpUsername,
+      to: email,
+      subject: `Birthday Greetings for ${fullName}!`,
+      html: generateBirthdayEmailTemplate(fullName, age),
+    };
+
+    transporter.sendMail(mailOptions, async (error, info) => {
+      if (error) {
+        res.status(500).send("Failed to send OTP");
+      } else {
+        await User.findByIdAndUpdate(_id, { isWished: true }, { new: true });
+        await Students.findByIdAndUpdate(
+          _id,
+          { isWished: true },
+          { new: true }
+        );
+        res.status(201).send("Birthday wishes send successfully");
       }
-     const { fullName, email, dob } = req.body;
-     const dobDate = new Date(dob);
-     const today = new Date();
-     const age =
-       today.getFullYear() -
-       dobDate.getFullYear() -
-       (today.getMonth() < dobDate.getMonth() ||
-       (today.getMonth() === dobDate.getMonth() &&
-         today.getDate() < dobDate.getDate())
-         ? 1
-         : 0);
-
-      const mailOptions = {
-        from: smtpUsername,
-        to: email,
-        subject: `Birthday Greetings for ${fullName}!`,
-        html: generateBirthdayEmailTemplate(fullName, age),
-      };
-
-      transporter.sendMail(mailOptions, async (error, info) => {
-        if (error) {
-          res.status(500).send("Failed to send OTP");
-        } else {
-          await User.findByIdAndUpdate(_id, { isWished: true }, { new: true });
-          await Students.findByIdAndUpdate(
-            _id,
-            { isWished: true },
-            { new: true }
-          );
-          res.status(201).send("Birthday wishes send successfully");
-        }
-      });
-  
+    });
   } catch (err) {
     res.status(500).send("Internal server error");
   }
