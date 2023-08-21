@@ -21,6 +21,7 @@ console.log(smtpUsername, smtpPassword);
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
   service: "outlook",
+  host: "outlook.office365.com",
   auth: {
     user: smtpUsername,
     pass: smtpPassword,
