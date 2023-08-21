@@ -20,8 +20,8 @@ console.log(smtpUsername, smtpPassword);
 
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-  service: "outlook",
-  host: smtp.office365.com,
+  service: "Outlook365",
+  host: "smtp.office365.com",
   port: 587,
   method: "STARTTLS",
   auth: {
