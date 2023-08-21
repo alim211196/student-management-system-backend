@@ -24,7 +24,7 @@ const transporter = nodemailer.createTransport({
   host: "smtp.office365.com",
   secureConnection: false,
   port: 587,
-  method: "STARTTLS",
+  security: "STARTTLS",
   auth: {
     user: smtpUsername,
     pass: smtpPassword,
