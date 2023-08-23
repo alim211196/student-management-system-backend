@@ -19,10 +19,10 @@ const smtpPassword = process.env.SMTP_PASSWORD;
 console.log(smtpUsername, smtpPassword);
 
 // Configure nodemailer transporter
-const transporter = nodemailer.createTransport("SMTP", {
+const transporter = nodemailer.createTransport({
   host: "smtp-mail.outlook.com",
-  secureConnection: false,
   port: 587,
+  secure: false, // Set to true if you want to use TLS
   auth: {
     user: smtpUsername,
     pass: smtpPassword,
