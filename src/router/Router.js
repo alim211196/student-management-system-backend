@@ -24,6 +24,8 @@ const transporter = nodemailer.createTransport({
   tls: {
     ciphers: "SSLv3",
   },
+  // Increase the timeout to 30 seconds (default is 5 seconds)
+  connectionTimeout: 30000,
 });
 
 
