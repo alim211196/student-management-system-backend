@@ -13,18 +13,32 @@ const Course = require("../models/courses");
 const generateEmailTemplate = require("../emailTemplate");
 const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
 // Configure nodemailer transporter
-const transporter = nodemailer.createTransport({
-  host: "smtp.office365.com",
-  port: 587,
-  secure: false,
+// const transporter = nodemailer.createTransport({
+//   host: "smtp.office365.com",
+//   port: 587,
+//   secure: false,
+//   auth: {
+//     user: "Alim.Mohammad619@outlook.com",
+//     pass: process.env.SMTP_PASSWORD,
+//   },
+//   tls: {
+//     ciphers: "SSLv3",
+//   },
+// });
+
+var transporter = nodemailer.createTransport({
+  host: "smtp-mail.outlook.com", // hostname
+  secureConnection: false, // TLS requires secureConnection to be false
+  port: 587, // port for secure SMTP
   auth: {
     user: "Alim.Mohammad619@outlook.com",
-    pass: process.env.SMTP_PASSWORD,
+    pass: "Mc@2020!$",
   },
   tls: {
     ciphers: "SSLv3",
   },
 });
+
 
 const generateOTP = () => {
   const digits = "0123456789";
