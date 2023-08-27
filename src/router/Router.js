@@ -14,8 +14,8 @@ const generateEmailTemplate = require("../emailTemplate");
 const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-  host: "smtp.live.com", // hostname
-  secureConnection: false, // use SSL
+  host: "smtp.office365.com",
+  secureConnection: false,
   port: 587,
   auth: {
     user: "Alim.Mohammad619@outlook.com",
