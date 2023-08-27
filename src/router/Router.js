@@ -12,12 +12,18 @@ const Course = require("../models/courses");
 
 const generateEmailTemplate = require("../emailTemplate");
 const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
+const SMTP_USER="Alim.Mohammad619@outlook.com";
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.office365.com",
+  port: 587,
+  secure: false,
   auth: {
-    user: "mohdalim8180036208@gmail.com",
+    user: SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
+  },
+  tls: {
+    ciphers: "SSLv3",
   },
 });
 
@@ -202,7 +208,7 @@ router.post("/students/comment/reply", async (req, res) => {
     const result = await reply.save();
     if (user_contact) {
       const mailOptions = {
-        from: "mohdalim8180036208@gmail.com",
+        from: SMTP_USER,
         to: email,
         subject: subject,
         html: generateEmailTemplate(
@@ -280,7 +286,7 @@ router.post("/user/register", async (req, res) => {
     const result = await user.save();
     if (password) {
       const mailOptions = {
-        from: "mohdalim8180036208@gmail.com",
+        from: SMTP_USER,
         to: email,
         subject: `Hi ${fullName} your account has been registered for StudentsTracker.`,
         html: generateEmailTemplate(
@@ -374,7 +380,7 @@ router.patch("/user/update-user/:id", async (req, res) => {
     // Check if the password field is being updated
     if (existingUser.password !== req.body.password) {
       const mailOptions = {
-        from: "mohdalim8180036208@gmail.com",
+        from: SMTP_USER,
         to: existingUser.email,
         subject: `Password has been updated for StudentsTracker by administrator.`,
         html: generateEmailTemplate(
@@ -486,7 +492,7 @@ router.post("/user/forgot-password", async (req, res) => {
     if (user) {
       const otp = generateOTP();
       const mailOptions = {
-        from: "mohdalim8180036208@gmail.com",
+        from: SMTP_USER,
         to: email,
         subject: "Password Reset OTP",
         html: generateEmailTemplate(
@@ -570,7 +576,7 @@ router.post("/user/send-wishes/:id", async (req, res) => {
         : 0);
 
     const mailOptions = {
-      from: "mohdalim8180036208@gmail.com",
+      from: SMTP_USER,
       to: email,
       subject: `Birthday Greetings for ${fullName}!`,
       html: generateBirthdayEmailTemplate(fullName, age),
