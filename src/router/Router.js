@@ -14,12 +14,15 @@ const generateEmailTemplate = require("../emailTemplate");
 const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-  host: "smtp-mail.outlook.com",
+  host: "smtp.office365.com",
   port: 587,
   secure: false,
   auth: {
     user: "Alim.Mohammad619@outlook.com",
     pass: process.env.SMTP_PASSWORD,
+  },
+  tls: {
+    ciphers: "SSLv3",
   },
 });
 
