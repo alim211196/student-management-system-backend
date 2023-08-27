@@ -12,20 +12,14 @@ const Course = require("../models/courses");
 
 const generateEmailTemplate = require("../emailTemplate");
 const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
-
-const smtpUsername = process.env.SMTP_USERNAME;
-const smtpPassword = process.env.SMTP_PASSWORD;
-
-console.log(smtpUsername, smtpPassword);
-
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
   host: "smtp-mail.outlook.com",
   port: 587,
   secure: false,
   auth: {
-    user: smtpUsername,
-    pass: smtpPassword,
+    user: "Alim.Mohammad619@outlook.com",
+    pass: process.env.SMTP_PASSWORD,
   },
 });
 
