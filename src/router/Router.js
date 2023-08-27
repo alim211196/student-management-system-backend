@@ -14,11 +14,11 @@ const generateEmailTemplate = require("../emailTemplate");
 const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-  service: "gmail", 
+  service: "gmail",
   auth: {
-    user: "mohdalim8180036208@gmail.com", 
-    pass: "AliyaAlim@3"
-  }
+    user: "mohdalim8180036208@gmail.com",
+    pass: "dvmhdtagedimpxdg",
+  },
 });
 
 
