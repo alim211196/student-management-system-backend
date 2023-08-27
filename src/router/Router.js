@@ -14,18 +14,13 @@ const generateEmailTemplate = require("../emailTemplate");
 const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-  host: "smtp.office365.com",
-  secureConnection: false,
+  host: "smtp.oxcytech.com",
   port: 587,
+  secure: false,
   auth: {
-    user: "Alim.Mohammad619@outlook.com",
+    user: "alim.mohd@oxcytech.com",
     pass: process.env.SMTP_PASSWORD,
   },
-  tls: {
-    ciphers: "SSLv3",
-  },
-  // Increase the timeout to 30 seconds (default is 5 seconds)
-  connectionTimeout: 30000,
 });
 
 
