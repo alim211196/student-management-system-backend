@@ -1,68 +1,19 @@
 require("dotenv").config();
 const express = require("express");
-const nodemailer = require("nodemailer");
+const generateToken = require("../utils/auth");
 const router = new express.Router();
 const Students = require("../models/students");
 const User = require("../models/user");
 const Contact = require("../models/contact");
 const Reply = require("../models/reply");
 const Attendance = require("../models/attendance");
-const OTPModel = require("../models/otp_model");
 const Course = require("../models/courses");
+const generateEmailTemplate = require("../utils/emailTemplate");
+const generateBirthdayEmailTemplate = require("../utils/generateBirthdayEmailTemplate ");
+const { transporter, generateOTP, insertOTP, verifyOTP } = require("../utils/commonFunction");
+const authMiddleware = require("../middleware/auth");
+const SMTP_USER = "alim.mohd@oxcytech.com";
 
-const generateEmailTemplate = require("../emailTemplate");
-const generateBirthdayEmailTemplate = require("../generateBirthdayEmailTemplate ");
-const SMTP_USER="Alim.Mohammad619@outlook.com";
-// Configure nodemailer transporter
-const transporter = nodemailer.createTransport({
-  host: "smtp.office365.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  tls: {
-    ciphers: "SSLv3",
-  },
-});
-
-
-const generateOTP = () => {
-  const digits = "0123456789";
-  let OTP = "";
-  for (let i = 0; i < 6; i++) {
-    OTP += digits[Math.floor(Math.random() * 10)];
-  }
-  return OTP;
-};
-
-const insertOTP = async (email, otp) => {
-  try {
-    const otpData = {
-      email,
-      otp: otp.toString(),
-    };
-    await OTPModel.create(otpData);
-    return true; // Indicate successful insertion
-  } catch (error) {
-    console.error("Error saving OTP:", error);
-    return false; // Indicate failure
-  }
-};
-
-const verifyOTP = async (email, otp) => {
-  try {
-    const storedOTP = await OTPModel.findOne({ email });
-    if (storedOTP) {
-      return storedOTP.otp === otp;
-    } else {
-      throw new Error("OTP not found for the given email");
-    }
-  } catch (error) {
-    throw new Error("Failed to verify OTP");
-  }
-};
 //////////////////////////////student's api/////////////////////////////////
 
 //create student api
@@ -231,7 +182,7 @@ router.post("/students/comment/reply", async (req, res) => {
       res.status(404).send("User not found");
     }
   } catch (err) {
-    console.log(err)
+    console.log(err);
     res.status(500).send("Internal server error.");
   }
 });
@@ -352,7 +303,7 @@ router.patch("/user/activation/:id", async (req, res) => {
 });
 
 //get user by id
-router.get("/user/get-user/:id", async (req, res) => {
+router.get("/user/get-user/:id", authMiddleware, async (req, res) => {
   try {
     const _id = req.params.id;
     const result = await User.findById(_id);
@@ -463,12 +414,12 @@ router.patch("/user/update-password/:id", async (req, res) => {
 //create login api
 router.post("/user/login", async (req, res) => {
   try {
-    const email = req.body.email;
-    const password = req.body.password;
+    const { email, password } = req.body;
     const user = await User.findOne({ email: email });
     if (user.active) {
       if (user.password === password) {
-        res.status(201).send(user);
+        const token = generateToken(user);
+        res.status(201).json({ token });
       } else {
         res.status(404).send("User not found.");
       }
