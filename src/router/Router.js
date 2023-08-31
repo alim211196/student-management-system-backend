@@ -10,8 +10,14 @@ const Attendance = require("../models/attendance");
 const Course = require("../models/courses");
 const generateEmailTemplate = require("../utils/emailTemplate");
 const generateBirthdayEmailTemplate = require("../utils/generateBirthdayEmailTemplate ");
-const { transporter, generateOTP, insertOTP, verifyOTP } = require("../utils/commonFunction");
+const {
+  transporter,
+  generateOTP,
+  insertOTP,
+  verifyOTP,
+} = require("../utils/commonFunction");
 const authMiddleware = require("../middleware/auth");
+const jwt = require("jsonwebtoken");
 const SMTP_USER = "alim.mohd@oxcytech.com";
 
 //////////////////////////////student's api/////////////////////////////////
@@ -398,7 +404,7 @@ router.patch("/user/update-password/:id", async (req, res) => {
 
     // Check if current password matches
     if (currentPassword !== user.password) {
-      return res.status(401).send("Current password is incorrect.");
+      return res.status(404).send("Current password is incorrect.");
     }
 
     // Update password in database
@@ -430,6 +436,19 @@ router.post("/user/login", async (req, res) => {
           "Login failed. Your account has been deactivated. Please contact your administrator for assistance."
         );
     }
+  } catch (err) {
+    res.status(500).send("Internal server error.");
+  }
+});
+
+router.post("/user/refresh-token", authMiddleware, async (req, res) => {
+  try {
+    const user = req.user;
+    console.log(user);
+    const newToken = generateToken(user);
+
+    res.status(201).json({ token: newToken });
+    console.log(newToken);
   } catch (err) {
     res.status(500).send("Internal server error.");
   }
