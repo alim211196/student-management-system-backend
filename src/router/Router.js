@@ -23,7 +23,7 @@ const SMTP_USER = "alim.mohd@oxcytech.com";
 //////////////////////////////student's api/////////////////////////////////
 
 //create student api
-router.post("/students/add", async (req, res) => {
+router.post("/students/add", authMiddleware, async (req, res) => {
   try {
     const course = req.body.course;
     const course_year = req.body.course_year;
@@ -73,7 +73,7 @@ router.post("/students/add", async (req, res) => {
 });
 
 //get students
-router.get("/students/get-students", async (req, res) => {
+router.get("/students/get-students", authMiddleware, async (req, res) => {
   try {
     const result = await Students.find().sort({ date: -1 });
     res.status(200).send(result);
@@ -83,7 +83,7 @@ router.get("/students/get-students", async (req, res) => {
 });
 
 //get student by id
-router.get("/students/get-student/:id", async (req, res) => {
+router.get("/students/get-student/:id", authMiddleware, async (req, res) => {
   try {
     const _id = req.params.id;
     const result = await Students.findById(_id);
@@ -98,24 +98,28 @@ router.get("/students/get-student/:id", async (req, res) => {
 });
 
 //update student
-router.patch("/students/update-student/:id", async (req, res) => {
-  try {
-    const _id = req.params.id;
-    const result = await Students.findByIdAndUpdate(_id, req.body, {
-      new: true,
-    });
-    if (!result) {
-      return res.status(404).send("User not found.");
-    } else {
-      res.status(200).send("Student updated successfully.");
+router.patch(
+  "/students/update-student/:id",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const _id = req.params.id;
+      const result = await Students.findByIdAndUpdate(_id, req.body, {
+        new: true,
+      });
+      if (!result) {
+        return res.status(404).send("User not found.");
+      } else {
+        res.status(200).send("Student updated successfully.");
+      }
+    } catch (err) {
+      res.status(500).send("Internal server error.");
     }
-  } catch (err) {
-    res.status(500).send("Internal server error.");
   }
-});
+);
 
 //student activation
-router.patch("/students/activation/:id", async (req, res) => {
+router.patch("/students/activation/:id", authMiddleware, async (req, res) => {
   const _id = req.params.id;
   const { active } = req.body;
 
@@ -154,7 +158,7 @@ router.post("/students/contact/add", async (req, res) => {
 });
 
 //send reply api
-router.post("/students/comment/reply", async (req, res) => {
+router.post("/students/comment/reply", authMiddleware, async (req, res) => {
   const reply = new Reply(req.body);
   try {
     const fullName = req.body.fullName;
@@ -194,47 +198,55 @@ router.post("/students/comment/reply", async (req, res) => {
 });
 
 //get comments
-router.get("/students/contact/get-comments", async (req, res) => {
-  try {
-    const result = await Contact.find().sort({ date: -1 });
-    res.status(200).send(result);
-  } catch (err) {
-    res.status(500).send("Internal server error.");
+router.get(
+  "/students/contact/get-comments",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const result = await Contact.find().sort({ date: -1 });
+      res.status(200).send(result);
+    } catch (err) {
+      res.status(500).send("Internal server error.");
+    }
   }
-});
+);
 
 //student queries activation
-router.patch("/students/comment/activation/:id", async (req, res) => {
-  const _id = req.params.id;
-  const { active } = req.body;
+router.patch(
+  "/students/comment/activation/:id",
+  authMiddleware,
+  async (req, res) => {
+    const _id = req.params.id;
+    const { active } = req.body;
 
-  try {
-    const contact = await Contact.findByIdAndUpdate(
-      _id,
-      { active: active },
-      { new: true }
-    );
-
-    if (!contact) {
-      return res.status(404).send("User not found.");
-    }
-
-    res
-      .status(200)
-      .send(
-        active
-          ? "Comment activated successfully"
-          : "Comment deactivated successfully"
+    try {
+      const contact = await Contact.findByIdAndUpdate(
+        _id,
+        { active: active },
+        { new: true }
       );
-  } catch (err) {
-    res.status(500).send("Internal server error.");
+
+      if (!contact) {
+        return res.status(404).send("User not found.");
+      }
+
+      res
+        .status(200)
+        .send(
+          active
+            ? "Comment activated successfully"
+            : "Comment deactivated successfully"
+        );
+    } catch (err) {
+      res.status(500).send("Internal server error.");
+    }
   }
-});
+);
 
 //////////////////////////////user's api/////////////////////////////////
 
 //create register api
-router.post("/user/register", async (req, res) => {
+router.post("/user/register", authMiddleware, async (req, res) => {
   const user = new User(req.body);
   try {
     const password = req.body.password;
@@ -269,7 +281,7 @@ router.post("/user/register", async (req, res) => {
 });
 
 //get users
-router.get("/user/get-users", async (req, res) => {
+router.get("/user/get-users", authMiddleware, async (req, res) => {
   try {
     const result = await User.find({ role: { $ne: "Admin" } }).sort({
       date: -1,
@@ -281,7 +293,7 @@ router.get("/user/get-users", async (req, res) => {
 });
 
 //user activation
-router.patch("/user/activation/:id", async (req, res) => {
+router.patch("/user/activation/:id", authMiddleware, async (req, res) => {
   const _id = req.params.id;
   const { active } = req.body;
 
@@ -324,7 +336,7 @@ router.get("/user/get-user/:id", authMiddleware, async (req, res) => {
 });
 
 //update user
-router.patch("/user/update-user/:id", async (req, res) => {
+router.patch("/user/update-user/:id", authMiddleware, async (req, res) => {
   try {
     const _id = req.params.id;
     const existingUser = await User.findById(_id);
@@ -372,7 +384,7 @@ router.patch("/user/update-user/:id", async (req, res) => {
   }
 });
 //update profile
-router.patch("/user/update-profile/:id", async (req, res) => {
+router.patch("/user/update-profile/:id", authMiddleware, async (req, res) => {
   try {
     const _id = req.params.id;
     const result = await User.findByIdAndUpdate(_id, req.body, {
@@ -389,7 +401,7 @@ router.patch("/user/update-profile/:id", async (req, res) => {
 });
 
 //update user password
-router.patch("/user/update-password/:id", async (req, res) => {
+router.patch("/user/update-password/:id", authMiddleware, async (req, res) => {
   try {
     const _id = req.params.id;
     const currentPassword = req.body.currentPassword;
@@ -524,7 +536,7 @@ router.patch("/user/reset-password/:id", async (req, res) => {
 });
 
 //send birthday wishes api
-router.post("/user/send-wishes/:id", async (req, res) => {
+router.post("/user/send-wishes/:id", authMiddleware, async (req, res) => {
   try {
     const _id = req.params.id;
     const userModel =
@@ -584,7 +596,7 @@ const getTotalYears = async () => {
 };
 
 //get length of students,teachers,courses
-router.get("/resource-quantity", async (req, res) => {
+router.get("/resource-quantity", authMiddleware, async (req, res) => {
   try {
     const noOfStudents = await Students.countDocuments();
     const noOfTeacher = await User.countDocuments();
@@ -601,7 +613,7 @@ router.get("/resource-quantity", async (req, res) => {
   }
 });
 
-router.get("/get-recent-entry", async (req, res) => {
+router.get("/get-recent-entry", authMiddleware, async (req, res) => {
   try {
     const recentTeachers = await User.find({ role: { $ne: "Admin" } })
       .sort({ _id: -1 })
@@ -618,7 +630,7 @@ router.get("/get-recent-entry", async (req, res) => {
   }
 });
 
-router.get("/get-birthday", async (req, res) => {
+router.get("/get-birthday", authMiddleware, async (req, res) => {
   try {
     const today = new Date();
     const month = today.getMonth() + 1;
@@ -652,7 +664,7 @@ router.get("/get-birthday", async (req, res) => {
 });
 //////////////////////attendance/////////////////////
 //create attendance api
-router.post("/students/add-attendance", async (req, res) => {
+router.post("/students/add-attendance", authMiddleware, async (req, res) => {
   const attendance = new Attendance(req.body);
   try {
     const result = await attendance.save();
@@ -662,7 +674,7 @@ router.post("/students/add-attendance", async (req, res) => {
   }
 });
 //get attendance api
-router.get("/students/get-attendance", async (req, res) => {
+router.get("/students/get-attendance", authMiddleware, async (req, res) => {
   try {
     const attendanceData = await Attendance.find().sort({ date: -1 });
     const teacherData = await User.find();
@@ -692,7 +704,7 @@ router.get("/students/get-attendance", async (req, res) => {
 });
 
 //get attendance by id
-router.get("/students/get-attendance/:id", async (req, res) => {
+router.get("/students/get-attendance/:id", authMiddleware, async (req, res) => {
   try {
     const _id = req.params.id;
 
@@ -778,177 +790,176 @@ function isSunday(date) {
 }
 
 // GET overall attendance of specific student within a date range
-router.get("/student/get-student-attendance/:id", async (req, res) => {
-  try {
-    const studentId = req.params.id;
-    const { startDate, endDate } = req.query; // Add startDate and endDate
+router.get(
+  "/student/get-student-attendance/:id",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const studentId = req.params.id;
+      const { startDate, endDate } = req.query; // Add startDate and endDate
 
-    // Fetch student data for the specific student
-    const studentData = await Students.findById(studentId);
-    if (!studentData) {
-      return res.status(404).send("Student not found.");
-    }
-
-    // Fetch all attendance records within the date range
-    const attendanceData = await Attendance.find({
-      date: { $gte: startDate, $lte: endDate },
-    });
-
-    // Prepare the overallAttendance array in the desired format
-    const overallAttendance = attendanceData.map((record) => {
-      const studentAttendance = record.attendance.find(
-        (a) => a._id.toString() === studentId
-      );
-      return {
-        _id: record._id, // Assuming "record._id" is a unique identifier provided by MongoDB
-        date: record.date,
-        attendance: studentAttendance ? studentAttendance.attendance : false,
-      };
-    });
-
-    const attendanceCounterArray = attendanceData.map((record) => {
-      const studentAttendance = record.attendance.find(
-        (a) => a._id.toString() === studentId
-      );
-      return studentAttendance
-        ? studentAttendance.attendance === true
-          ? 1
-          : 0
-        : 0;
-    });
-
-    // Calculate the number of present days
-    const presentDays = overallAttendance.filter(
-      (record) => record.attendance
-    ).length;
-
-    // Calculate the number of days in the date range excluding Sundays
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    let totalDaysExcludingSundays = 0;
-
-    for (let day = start; day <= end; day.setDate(day.getDate() + 1)) {
-      if (!isSunday(day)) {
-        totalDaysExcludingSundays++;
+      // Fetch student data for the specific student
+      const studentData = await Students.findById(studentId);
+      if (!studentData) {
+        return res.status(404).send("Student not found.");
       }
+
+      // Fetch all attendance records within the date range
+      const attendanceData = await Attendance.find({
+        date: { $gte: startDate, $lte: endDate },
+      });
+
+      // Prepare the overallAttendance array in the desired format
+      const overallAttendance = attendanceData.map((record) => {
+        const studentAttendance = record.attendance.find(
+          (a) => a._id.toString() === studentId
+        );
+        return {
+          _id: record._id, // Assuming "record._id" is a unique identifier provided by MongoDB
+          date: record.date,
+          attendance: studentAttendance ? studentAttendance.attendance : false,
+        };
+      });
+
+      const attendanceCounterArray = attendanceData.map((record) => {
+        const studentAttendance = record.attendance.find(
+          (a) => a._id.toString() === studentId
+        );
+        return studentAttendance
+          ? studentAttendance.attendance === true
+            ? 1
+            : 0
+          : 0;
+      });
+
+      // Calculate the number of present days
+      const presentDays = overallAttendance.filter(
+        (record) => record.attendance
+      ).length;
+
+      // Calculate the number of days in the date range excluding Sundays
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      let totalDaysExcludingSundays = 0;
+
+      for (let day = start; day <= end; day.setDate(day.getDate() + 1)) {
+        if (!isSunday(day)) {
+          totalDaysExcludingSundays++;
+        }
+      }
+
+      // Calculate the attendance percentage
+      const attendancePercentage = (
+        (presentDays / overallAttendance.length) *
+        100
+      ).toFixed(2);
+
+      // Prepare the response object
+      const response = {
+        fullName: studentData.fullName,
+        profileImage: studentData.profileImage,
+        rollNo: studentData.rollNo,
+        student_id: studentData._id,
+        overallAttendance,
+        course: studentData.course,
+        courseYear: studentData.courseYear,
+        startDate,
+        endDate,
+        attendancePercentage: `${attendancePercentage}%`,
+        totalAttendanceDays: overallAttendance.length,
+        attendanceCounterArray: attendanceCounterArray,
+        presentDays,
+        absentDays: overallAttendance.length - presentDays,
+      };
+
+      // Send the response object as the response
+      res.status(200).send(response);
+    } catch (err) {
+      res.status(500).send("Internal server error.");
     }
-
-    // Calculate the attendance percentage
-    const attendancePercentage = (
-      (presentDays / overallAttendance.length) *
-      100
-    ).toFixed(2);
-
-    // Prepare the response object
-    const response = {
-      fullName: studentData.fullName,
-      profileImage: studentData.profileImage,
-      rollNo: studentData.rollNo,
-      student_id: studentData._id,
-      overallAttendance,
-      course: studentData.course,
-      courseYear: studentData.courseYear,
-      startDate,
-      endDate,
-      attendancePercentage: `${attendancePercentage}%`,
-      totalAttendanceDays: overallAttendance.length,
-      attendanceCounterArray: attendanceCounterArray,
-      presentDays,
-      absentDays: overallAttendance.length - presentDays,
-    };
-
-    // Send the response object as the response
-    res.status(200).send(response);
-  } catch (err) {
-    res.status(500).send("Internal server error.");
   }
-});
+);
 
 //attendance activation
-router.patch("/students/attendance/activation/:id", async (req, res) => {
-  const _id = req.params.id;
-  const { active } = req.body;
+router.patch(
+  "/students/attendance/activation/:id",
+  authMiddleware,
+  async (req, res) => {
+    const _id = req.params.id;
+    const { active } = req.body;
 
-  try {
-    const attendance = await Attendance.findByIdAndUpdate(
-      _id,
-      { active: active },
-      { new: true }
-    );
-
-    if (!attendance) {
-      return res.status(404).send("Attendance not found.");
-    }
-
-    res
-      .status(200)
-      .send(
-        active
-          ? "Attendance activated successfully"
-          : "Attendance deactivated successfully"
+    try {
+      const attendance = await Attendance.findByIdAndUpdate(
+        _id,
+        { active: active },
+        { new: true }
       );
-  } catch (err) {
-    res.status(500).send("Internal server error.");
+
+      if (!attendance) {
+        return res.status(404).send("Attendance not found.");
+      }
+
+      res
+        .status(200)
+        .send(
+          active
+            ? "Attendance activated successfully"
+            : "Attendance deactivated successfully"
+        );
+    } catch (err) {
+      res.status(500).send("Internal server error.");
+    }
   }
-});
+);
 
 //update attendance
-router.patch("/students/update-attendance/:id", async (req, res) => {
-  try {
-    const _id = req.params.id;
-    const { attendanceId, attendanceValue } = req.body;
+router.patch(
+  "/students/update-attendance/:id",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const _id = req.params.id;
+      const { attendanceId, attendanceValue } = req.body;
 
-    // Find the attendance object in the array that matches the attendanceId
-    const attendanceDoc = await Attendance.findById(_id);
-    if (!attendanceDoc) {
-      return res.status(404).send("User not found.");
+      // Find the attendance object in the array that matches the attendanceId
+      const attendanceDoc = await Attendance.findById(_id);
+      if (!attendanceDoc) {
+        return res.status(404).send("User not found.");
+      }
+
+      const attendanceIndex = attendanceDoc.attendance.findIndex(
+        (attendance) => attendance._id === attendanceId
+      );
+      if (attendanceIndex === -1) {
+        return res.status(404).send("Attendance not found.");
+      }
+
+      // Update the attendance value in the document
+      attendanceDoc.attendance[attendanceIndex].attendance = attendanceValue;
+
+      // Save the updated document using findByIdAndUpdate()
+      const updatedDoc = await Attendance.findByIdAndUpdate(
+        _id,
+        { attendance: attendanceDoc.attendance },
+        { new: true }
+      );
+
+      if (!updatedDoc) {
+        return res.status(404).send("User not found.");
+      } else {
+        res.status(200).send("Attendance updated successfully.");
+      }
+    } catch (err) {
+      res.status(500).send("Internal server error.");
     }
-
-    const attendanceIndex = attendanceDoc.attendance.findIndex(
-      (attendance) => attendance._id === attendanceId
-    );
-    if (attendanceIndex === -1) {
-      return res.status(404).send("Attendance not found.");
-    }
-
-    // Update the attendance value in the document
-    attendanceDoc.attendance[attendanceIndex].attendance = attendanceValue;
-
-    // Save the updated document using findByIdAndUpdate()
-    const updatedDoc = await Attendance.findByIdAndUpdate(
-      _id,
-      { attendance: attendanceDoc.attendance },
-      { new: true }
-    );
-
-    if (!updatedDoc) {
-      return res.status(404).send("User not found.");
-    } else {
-      res.status(200).send("Attendance updated successfully.");
-    }
-  } catch (err) {
-    res.status(500).send("Internal server error.");
   }
-});
+);
 
-//delete attendance
-router.delete("/students/delete-attendance/:id", async (req, res) => {
-  try {
-    const _id = req.params.id;
-    const result = await Attendance.findByIdAndDelete(_id);
-    if (!result) {
-      return res.status(404).send("User not found.");
-    } else {
-      res.status(200).send("Deleted Successfully.");
-    }
-  } catch (err) {
-    res.status(500).send("Internal server error.");
-  }
-});
+
 
 //////////////////////////////course's api/////////////////////////////////
 //add courses api
-router.post("/students/courses/add", async (req, res) => {
+router.post("/students/courses/add", authMiddleware, async (req, res) => {
   const course = new Course(req.body);
   try {
     await course.save();
@@ -969,48 +980,56 @@ router.get("/students/courses", async (req, res) => {
 });
 
 //course activation
-router.patch("/students/courses/activation/:id", async (req, res) => {
-  const _id = req.params.id;
-  const { active } = req.body;
+router.patch(
+  "/students/courses/activation/:id",
+  authMiddleware,
+  async (req, res) => {
+    const _id = req.params.id;
+    const { active } = req.body;
 
-  try {
-    const course = await Course.findByIdAndUpdate(
-      _id,
-      { active: active },
-      { new: true }
-    );
-
-    if (!course) {
-      return res.status(404).send("Course not found.");
-    }
-
-    res
-      .status(200)
-      .send(
-        active
-          ? "Course activated successfully"
-          : "Course deactivated successfully"
+    try {
+      const course = await Course.findByIdAndUpdate(
+        _id,
+        { active: active },
+        { new: true }
       );
-  } catch (err) {
-    res.status(500).send("Internal server error.");
+
+      if (!course) {
+        return res.status(404).send("Course not found.");
+      }
+
+      res
+        .status(200)
+        .send(
+          active
+            ? "Course activated successfully"
+            : "Course deactivated successfully"
+        );
+    } catch (err) {
+      res.status(500).send("Internal server error.");
+    }
   }
-});
+);
 
 //update course
-router.patch("/students/update-course/:id", async (req, res) => {
-  try {
-    const _id = req.params.id;
-    const result = await Course.findByIdAndUpdate(_id, req.body, {
-      new: true,
-    });
-    if (!result) {
-      return res.status(404).send("Course not found.");
-    } else {
-      res.status(200).send("Course updated successfully.");
+router.patch(
+  "/students/update-course/:id",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const _id = req.params.id;
+      const result = await Course.findByIdAndUpdate(_id, req.body, {
+        new: true,
+      });
+      if (!result) {
+        return res.status(404).send("Course not found.");
+      } else {
+        res.status(200).send("Course updated successfully.");
+      }
+    } catch (err) {
+      res.status(500).send("Internal server error.");
     }
-  } catch (err) {
-    res.status(500).send("Internal server error.");
   }
-});
+);
 
 module.exports = router;
