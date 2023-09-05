@@ -26,19 +26,19 @@ schedule.scheduleJob("0 0 * * *", async () => {
 
   users.forEach(async (user) => {
     if (
-      user.dob.getMonth() === today.getMonth() &&
-      user.dob.getDate() === today.getDate()
+      user?.dob?.getMonth() === today?.getMonth() &&
+      user?.dob?.getDate() === today?.getDate()
     ) {
-      await User.findByIdAndUpdate(user._id, { isWished: false });
+      await User.findByIdAndUpdate(user?._id, { isWished: false });
     }
   });
 
   students.forEach(async (student) => {
     if (
-      student.dob.getMonth() === today.getMonth() &&
-      student.dob.getDate() === today.getDate()
+      student?.dob?.getMonth() === today?.getMonth() &&
+      student?.dob?.getDate() === today?.getDate()
     ) {
-      await Students.findByIdAndUpdate(student._id, { isWished: false });
+      await Students.findByIdAndUpdate(student?._id, { isWished: false });
     }
   });
 });
