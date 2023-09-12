@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const postSchema = mongoose.Schema({
+
+const postUserSchema = mongoose.Schema({
   fullName: {
     type: String,
     required: true,
@@ -22,21 +23,18 @@ const postSchema = mongoose.Schema({
     required: true,
     unique: true,
   },
-  gender: {
+  password: {
     type: String,
     required: true,
-  },
-  postTitle: {
-    type: String,
-    required: true,
-  },
-  postDescription: {
-    type: String,
-    required: true,
+    minlength: [8, "minimum 8 letters"],
   },
   profileImage: { type: String, default: null },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-const Post = new mongoose.model("Post", postSchema);
+const PostUser = mongoose.model("PostUser", postUserSchema);
 
-module.exports = Post;
+module.exports = PostUser;

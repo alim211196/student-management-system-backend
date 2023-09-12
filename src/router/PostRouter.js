@@ -1,8 +1,7 @@
-
 require("dotenv").config();
 const express = require("express");
 const router = new express.Router();
-const Post = require("../models/post");
+const PostUser = require("../models/PostUser");
 //post api
 
 //add post api
@@ -74,6 +73,56 @@ router.delete("/posts/:id", async (req, res) => {
       return res.status(404).send("Post not found.");
     } else {
       res.status(200).send("Post deleted Successfully.");
+    }
+  } catch (err) {
+    res.status(500).send("Internal server error.");
+  }
+});
+
+//add user api
+router.post("/posts/user-register", async (req, res) => {
+  const user = new PostUser(req.body);
+  try {
+    await user.save();
+    const userId = user?._id;
+    res.status(201).send(userId);
+  } catch (err) {
+    if (err.code === 11000) {
+      // This error code indicates a duplicate key (email or phone)
+      res.status(400).send("Email or phone already exists.");
+    } else {
+      // Handle other errors
+      console.error(err);
+      res.status(500).send("Internal server error.");
+    }
+  }
+});
+
+//create login api
+router.post("/posts/user-login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await PostUser.findOne({ email: email });
+    if (user.password === password) {
+      const userId = user?._id;
+      res.status(201).send(userId);
+    } else {
+      res.status(404).send("User not found.");
+    }
+  } catch (err) {
+    res.status(500).send("Internal server error.");
+  }
+});
+
+//get user by id
+router.get("/posts/get-user/:id", async (req, res) => {
+  try {
+    const _id = req.params.id;
+    const result = await PostUser.findById(_id);
+    if (!result) {
+      return res.status(404).send("User not found.");
+    } else {
+      res.status(200).send(result);
     }
   } catch (err) {
     res.status(500).send("Internal server error.");
