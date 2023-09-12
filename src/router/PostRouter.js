@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const router = new express.Router();
+const Post = require("../models/post");
 const PostUser = require("../models/PostUser");
 //post api
 
