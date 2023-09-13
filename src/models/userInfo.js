@@ -9,6 +9,7 @@ const userInfoSchema = mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
     validate(v) {
       if (!validator.isEmail(v)) {
         throw new Error("invalid Email");
@@ -19,6 +20,7 @@ const userInfoSchema = mongoose.Schema({
     type: Number,
     min: 10,
     required: true,
+    unique: true,
   },
   profileImage: { type: String, default: null },
 });

@@ -8,8 +8,21 @@ const UserInfo = require("../models/userInfo");
 
 //add user api
 router.post("/user-info", async (req, res) => {
-  const userInfo = new UserInfo(req.body);
+  const { email, phone } = req.body;
+
   try {
+    // Check if a user with the same email or phone already exists
+    const existingUser = await UserInfo.findOne({
+      $or: [{ email }, { phone }],
+    });
+
+    if (existingUser) {
+      return res.status(400).send("Email or phone already exists.");
+    }
+
+    // Create a new user with default values for fullName, profileImage, and date
+    const userInfo = new UserInfo({ email, phone });
+
     await userInfo.save();
     res.status(201).send("User added successfully");
   } catch (err) {
@@ -51,18 +64,33 @@ router.get("/user-info/:id", async (req, res) => {
 
 //update post
 router.patch("/user-info/:id", async (req, res) => {
+  const _id = req.params.id;
+
   try {
-    const _id = req.params.id;
-    const userInfo = await UserInfo.findByIdAndUpdate(_id, req.body, {
-      new: true,
-    });
-    if (!userInfo) {
+    // Fetch the existing user by ID
+    const existingUser = await UserInfo.findById(_id);
+
+    if (!existingUser) {
       return res.status(404).send("User not found.");
-    } else {
-      res.status(200).send("User updated successfully.");
     }
+
+    // Update only the specified fields (email and phone)
+    existingUser.email = req.body.email;
+    existingUser.phone = req.body.phone;
+
+    // Save the updated user
+    await existingUser.save();
+
+    res.status(200).send("User updated successfully.");
   } catch (err) {
-    res.status(500).send("Internal server error.");
+    if (err.code === 11000) {
+      // This error code indicates a duplicate key (email or phone)
+      res.status(400).send("Email or phone already exists.");
+    } else {
+      // Handle other errors
+      console.error(err);
+      res.status(500).send("Internal server error.");
+    }
   }
 });
 

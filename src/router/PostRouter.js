@@ -89,22 +89,23 @@ router.post("/posts/user-register", async (req, res) => {
     return res.status(400).json({ error: "Email and password are required." });
   }
 
-  // Check if the email is already registered
-  const existingUser = await PostUser.findOne({ email });
-  if (existingUser) {
-    return res.status(400).json({ error: "Email already exists." });
-  }
-
-  const newUser = new PostUser({
-    email,
-    password, // Store the plain password
-  });
-
   try {
+    // Attempt to create a new user
+    const newUser = new PostUser({
+      email,
+      password, // Store the plain password
+    });
+
+    // Save the new user
     await newUser.save();
     const userId = newUser._id;
     res.status(201).json({ userId });
   } catch (err) {
+    if (err.code === 11000 && err.keyPattern.email) {
+      // Duplicate email error
+      return res.status(400).json({ error: "Email already exists." });
+    }
+
     // Handle other errors
     console.error(err);
     res.status(500).json({ error: "Internal server error." });
