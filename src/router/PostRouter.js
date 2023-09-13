@@ -82,32 +82,16 @@ router.delete("/posts/:id", async (req, res) => {
 
 //add user api
 router.post("/posts/user-register", async (req, res) => {
-  const { email, password } = req.body;
-
-  // Validation checks
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required." });
-  }
 
   try {
-    // Attempt to create a new user
-    const newUser = new PostUser({
-      email,
-      password, // Store the plain password
-    });
-
-    // Save the new user
+    const newUser = new PostUser(req.body);
     await newUser.save();
-    const userId = newUser._id;
+    const userId = newUser?._id;
     res.status(201).json({ userId });
   } catch (err) {
-    if (err.code === 11000 && err.keyPattern.email) {
-      // Duplicate email error
-      return res.status(400).json({ error: "Email already exists." });
+    if (err.code === 11000) {
+      return res.status(400).json({ error: "User already exists." });
     }
-
-    // Handle other errors
-    console.error(err);
     res.status(500).json({ error: "Internal server error." });
   }
 });
