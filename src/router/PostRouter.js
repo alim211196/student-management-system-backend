@@ -82,37 +82,59 @@ router.delete("/posts/:id", async (req, res) => {
 
 //add user api
 router.post("/posts/user-register", async (req, res) => {
-  const user = new PostUser(req.body);
+  const { email, password } = req.body;
+
+  // Validation checks
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required." });
+  }
+
+  // Check if the email is already registered
+  const existingUser = await PostUser.findOne({ email });
+  if (existingUser) {
+    return res.status(400).json({ error: "Email already exists." });
+  }
+
+  const newUser = new PostUser({
+    email,
+    password, // Store the plain password
+  });
+
   try {
-    await user.save();
-    const userId = user?._id;
+    await newUser.save();
+    const userId = newUser._id;
     res.status(201).json({ userId });
   } catch (err) {
-    if (err.code === 11000) {
-      // This error code indicates a duplicate key (email or phone)
-      res.status(400).json({ error: "Email or phone already exists." });
-    } else {
-      // Handle other errors
-      console.error(err);
-      res.status(500).json({ error: "Internal server error." });
-    }
+    // Handle other errors
+    console.error(err);
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 
-//create login api
+// Login API
 router.post("/posts/user-login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await PostUser.findOne({ email: email });
-    const userId = user?._id;
-    if (user.password === password || email) {
-      res.status(201).json({ userId });
-    } else if (user.password === password && email) {
-      res.status(201).json({ userId });
+
+    // Find the user by email
+    const user = await PostUser.findOne({ email });
+
+    if (!user) {
+      // User not found
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    // Compare the provided password with the stored password
+    if (user.password === password) {
+      const userId = user._id;
+      return res.status(200).json({ userId });
     } else {
-      res.status(404).json({ error: "User not found." });
+      // Incorrect password
+      return res.status(401).json({ error: "Invalid credentials." });
     }
   } catch (err) {
+    // Handle other errors
+    console.error(err);
     res.status(500).json({ error: "Internal server error." });
   }
 });
