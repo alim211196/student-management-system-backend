@@ -10,7 +10,7 @@ router.post("/posts", async (req, res) => {
   const post = new Post(req.body);
   try {
     await post.save();
-    res.status(201).json({ message: "Post added successfully" });
+    res.status(201).json({ post });
   } catch (err) {
     if (err.code === 11000) {
       // This error code indicates a duplicate key (email or phone)
@@ -37,11 +37,11 @@ router.get("/posts", async (req, res) => {
 router.get("/posts/:id", async (req, res) => {
   try {
     const _id = req.params.id;
-    const result = await Post.findById(_id);
-    if (!result) {
+    const post = await Post.findById(_id);
+    if (!post) {
       return res.status(404).json({ error: "Post not found." });
     } else {
-      res.status(200).json({ result });
+      res.status(200).json({ post });
     }
   } catch (err) {
     res.status(500).json({ error: "Internal server error." });
@@ -52,13 +52,13 @@ router.get("/posts/:id", async (req, res) => {
 router.patch("/posts/:id", async (req, res) => {
   try {
     const _id = req.params.id;
-    const result = await Post.findByIdAndUpdate(_id, req.body, {
+    const post = await Post.findByIdAndUpdate(_id, req.body, {
       new: true,
     });
-    if (!result) {
+    if (!post) {
       return res.status(404).json({ error: "Post not found." });
     } else {
-      res.status(200).json({ message: "Post updated successfully." });
+      res.status(200).json({ post });
     }
   } catch (err) {
     res.status(500).json({ error: "Internal server error." });
@@ -104,8 +104,10 @@ router.post("/posts/user-login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await PostUser.findOne({ email: email });
-    if (user.password === password) {
-      const userId = user?._id;
+    const userId = user?._id;
+    if (user.password === password || email) {
+      res.status(201).json({ userId });
+    } else if (user.password === password && email) {
       res.status(201).json({ userId });
     } else {
       res.status(404).json({ error: "User not found." });
